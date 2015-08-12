@@ -1,0 +1,48 @@
+#!/usr/bin/env ruby
+require 'thor'
+require_relative '../lib/prime_finder/procedural'
+require_relative '../lib/prime_finder/functional'
+
+class Cli < Thor
+
+  option :count, type: :numeric, default: 1
+  option :functional, type: :boolean, default: false
+  option :starting_at, type: :numeric, default: 1
+  desc 'find', 'Find prime numbers'
+  def find_primes
+    puts "Finding #{options[:count]} primes (#{finder_algorithm(options[:functional])})..."
+    prime_finder = finder_algorithm_class(options[:functional])
+    primes_found = prime_finder.find(quantity: options[:count], start_value: options[:starting_at])
+    puts primes_found.inspect
+  end
+
+  option :count, type: :numeric, default: 1
+  desc 'multiply', 'Output multiplication table of prime numbers'
+  def multiply
+    set1 = set2 = PrimeFinder::Procedural.find(quantity: options[:count])
+
+    column_width = 4 # TODO: this should be calculated dynamically based on column widths
+
+    header_row = ([" ".rjust(column_width - 1), '|'] + set1.map{|i| "#{i}".rjust(column_width) }).join(' ')
+    puts header_row
+    puts "-" * header_row.length
+
+    # rows
+    set2.collect do |set2_value|
+      print "#{set2_value} ".rjust(column_width) + "| "
+      puts set1.collect{|set1_value| set1_value * set2_value }.map{|value| value.to_s.rjust(column_width)}.join(' ')
+    end
+  end
+
+  private
+
+  def finder_algorithm(functional)
+    finder_algorithm_class(functional).name
+  end
+
+  def finder_algorithm_class(functional)
+    functional ? PrimeFinder::Functional : PrimeFinder::Procedural
+  end
+end
+
+Cli.start(ARGV)

@@ -1,0 +1,1 @@
+require_relative 'procedural_vs_functional_benchmark'
